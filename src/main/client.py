@@ -1,6 +1,6 @@
 from src.main.properties import authentication_required
-from .exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError
-
+from src.main.exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError
+from src.main.constants import CRYPTO_SYMBOLS, CURRENCY_SYMBOLS, DEPOSIT_OR_WITHDRAWAL, TRADE_TYPES
 import base64
 import hashlib
 import hmac
@@ -148,8 +148,11 @@ class Client:
             last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
             start_date = int(last_30_days_timestamp * 1000)
 
+        if not symbol:
+            symbol = CRYPTO_SYMBOLS
+
         if not trade_type:
-            trade_type = ['buy', 'sell']
+            trade_type = TRADE_TYPES
 
         request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'trade'
         params = kwargs if kwargs else {'type': trade_type, 'symbol': symbol, 'startDate': start_date,
@@ -160,13 +163,16 @@ class Client:
         return history
 
     @authentication_required
-    def get_crypto_history(self, _type=None, symbol='BTC', start_date=None, end_date=int(time.time() * 1000), **kwargs):
+    def get_crypto_history(self, symbol=None, _type=None, start_date=None, end_date=int(time.time() * 1000), **kwargs):
         if not start_date:
             last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
             start_date = int(last_30_days_timestamp * 1000)
 
+        if not symbol:
+            symbol = CRYPTO_SYMBOLS
+
         if not _type:
-            _type = ['withdrawal', 'deposit']
+            _type = DEPOSIT_OR_WITHDRAWAL
 
         request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'crypto'
         params = kwargs if kwargs else {'type': _type, 'symbol': symbol, 'startDate': start_date, 'endDate': end_date}
@@ -176,14 +182,17 @@ class Client:
         return history
 
     @authentication_required
-    def get_fiat_history(self, balance_types=None, currency_symbols='try',
+    def get_fiat_history(self, balance_types=None, currency_symbols=None,
                          start_date=None, end_date=int(time.time() * 1000), **kwargs):
         if not start_date:
             last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=3600))
             start_date = int(last_30_days_timestamp * 1000)
 
         if not balance_types:
-            balance_types = ['withdrawal', 'deposit']
+            balance_types = DEPOSIT_OR_WITHDRAWAL
+
+        if not currency_symbols:
+            currency_symbols = CURRENCY_SYMBOLS
 
         request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'fiat'
         params = kwargs if kwargs else {'balanceTypes': balance_types, 'currencySymbols': currency_symbols,
