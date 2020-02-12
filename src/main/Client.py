@@ -103,3 +103,25 @@ class Client:
         self._handle_response(response)
 
         return "SUCCEEDED"
+
+    # PUBLIC ENDPOINT IMPLEMENTATIONS
+
+    def tick(self, pair=None, **kwargs):
+        request_url = self._create_public_endpoint_url('ticker')
+        params = kwargs if kwargs else {}
+
+        if pair:
+            return self._get(request_url, {'pairSymbol': pair})
+        return self._get(request_url, params)
+
+    def get_order_book(self, pair=None, limit=100, **kwargs):
+        request_url = self._create_public_endpoint_url('orderbook')
+        params = kwargs if kwargs else {'pairSymbol': pair, 'limit': limit}
+
+        return self._get(request_url, params)
+
+    def get_trades(self, pair=None, last=50, **kwargs):
+        request_url = self._create_public_endpoint_url('trades')
+        params = kwargs if kwargs else {'pairSymbol': pair, 'last': last}
+
+        return self._get(request_url, params=params)
