@@ -11,14 +11,12 @@ BTCTurk API'nı efektif bir şekilde projelerinizde kullanabilmeniz için tasarl
   * [Kurulum](#kurulum)
 * [Kullanım](#kullanım)
 * [Lisans](#lisans)
-* [İletişim](#iletişim)
+* [İletisim](#iletisim)
 
 
 
 <!-- Proje Hakkında -->
 ## Proje Hakkında
-
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
 
 BTCTurkApiWrapper
 
@@ -86,7 +84,7 @@ Bu python paketini herkes kullanabilir, değiştirebilir ve çoğaltabilir. Deta
 
 
 <!-- CONTACT -->
-## İletişim
+## İletisim
 
 Miraç Baydemir -  omermirac59@gmail.com
 
