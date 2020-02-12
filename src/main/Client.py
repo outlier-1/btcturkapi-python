@@ -72,3 +72,34 @@ class Client:
             # Authentication successful, update session header
             self.authenticated = True
             self.session.headers.update({"X-PCK": self.api_key})
+
+    @staticmethod
+    def _handle_response(response):
+        status = response.status_code
+        if status / 100 == 4:
+            # Raise bad request error
+            pass
+        if status / 100 == 5:
+            # Raise internal server error
+            pass
+
+    def _get(self, url, params=None):
+        response = self.session.get(url=url, params=params)
+        self._handle_response(response)
+        return response.json()['data']
+
+    def _post(self, url, params=None):
+        response = self.session.post(url=url, data=json.dumps(params))
+        self._handle_response(response)
+
+        if response.json()['success'] == 'false':
+            # Raise invalid request parameter exception
+            pass
+
+        return response.json()['data']
+
+    def _delete(self, url, params=None):
+        response = self.session.delete(url=url, params=params, data=json.dumps(params))
+        self._handle_response(response)
+
+        return "SUCCEEDED"
