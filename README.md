@@ -5,17 +5,17 @@ BTCTurk API'nı efektif bir şekilde projelerinizde kullanabilmeniz için tasarl
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
-* [Proje Hakkında](#about-the-project)
-* [Başlarken](#getting-started)
-  * [Gereklilikler](#prerequisites)
-  * [Kurulum](#installation)
-* [Kullanım](#usage)
-* [Lisans](#license)
-* [İletişim](#contact)
+* [Proje Hakkında](#proje-hakkında)
+* [Başlarken](#başlarken)
+  * [Gereklilikler](#gereklilikler)
+  * [Kurulum](#kurulum)
+* [Kullanım](#kullanım)
+* [Lisans](#lisans)
+* [İletişim](#iletişim)
 
 
 
-<!-- ABOUT THE PROJECT -->
+<!-- Proje Hakkında -->
 ## Proje Hakkında
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
@@ -79,7 +79,7 @@ btc_price = client.tick('BTC_TRY') # ETH_TRY, XRP_TRY vs...
 
 
 <!-- LICENSE -->
-## License
+## Lisans
 
 Bu python paketini herkes kullanabilir, değiştirebilir ve çoğaltabilir. Detaylı bilgi için LICENSE.txt'ye bakın
 
