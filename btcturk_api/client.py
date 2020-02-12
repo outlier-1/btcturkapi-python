@@ -1,6 +1,6 @@
-from src.main.properties import authentication_required
-from src.main.exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError
-from src.main.constants import CRYPTO_SYMBOLS, CURRENCY_SYMBOLS, DEPOSIT_OR_WITHDRAWAL, TRADE_TYPES
+from btcturk_api.properties import authentication_required
+from btcturk_api.exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError
+from btcturk_api.constants import CRYPTO_SYMBOLS, CURRENCY_SYMBOLS, DEPOSIT_OR_WITHDRAWAL, TRADE_TYPES
 import base64
 import hashlib
 import hmac
@@ -256,4 +256,3 @@ class Client:
         if kwargs:
             return self._post(request_url, kwargs)
         return self._post(request_url, params)
-

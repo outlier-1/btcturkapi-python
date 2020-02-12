@@ -1,4 +1,4 @@
-from src.main.exceptions import BTCTurkAuthenticationError
+from btcturk_api.exceptions import BTCTurkAuthenticationError
 
 import functools
 
