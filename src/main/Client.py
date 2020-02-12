@@ -1,3 +1,4 @@
+from src.main.properties import authentication_required
 from .exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError
 
 import base64
@@ -133,12 +134,14 @@ class Client:
 
     # AUTHENTICATION REQUIRED GET ENDPOINT IMPLEMENTATIONS
 
+    @authentication_required
     def get_account_balance(self):
         url = self._create_auth_endpoint_url('users/balances')
         self._update_session_headers()
         balance_list = self._get(url)
         return balance_list
 
+    @authentication_required
     def get_trade_history(self, trade_type=None, symbol='BTC',
                           start_date=None, end_date=int(time.time() * 1000), **kwargs):
         if not start_date:
@@ -156,6 +159,7 @@ class Client:
         history = self._get(request_url, params)
         return history
 
+    @authentication_required
     def get_crypto_history(self, _type=None, symbol='BTC', start_date=None, end_date=int(time.time() * 1000), **kwargs):
         if not start_date:
             last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
@@ -171,6 +175,7 @@ class Client:
         history = self._get(request_url, params)
         return history
 
+    @authentication_required
     def get_fiat_history(self, balance_types=None, currency_symbols='try',
                          start_date=None, end_date=int(time.time() * 1000), **kwargs):
         if not start_date:
@@ -188,6 +193,7 @@ class Client:
         history = self._get(request_url, params)
         return history
 
+    @authentication_required
     def get_open_orders(self, pair=None, **kwargs):
         request_url = self._create_auth_endpoint_url('openOrders')
         params = kwargs if kwargs else {'pairSymbol': pair}
@@ -197,7 +203,7 @@ class Client:
         return orders
 
     # AUTHENTICATION REQUIRED ORDER IMPLEMENTATIONS
-
+    @authentication_required
     def cancel_order(self, order_id=None):
         request_url = self._create_auth_endpoint_url('order')
         params = {'id': order_id}
@@ -205,6 +211,7 @@ class Client:
         self._update_session_headers()
         self._delete(request_url, params)
 
+    @authentication_required
     def submit_market_order(self, quantity=0.0, order_type=None,
                             pair_symbol=None, new_order_client_id=None):
         if not new_order_client_id:
@@ -213,6 +220,7 @@ class Client:
                   'orderType': order_type, 'pairSymbol': pair_symbol}
         return self.submit_order(params)
 
+    @authentication_required
     def submit_limit_order(self, quantity=0.0, price=0.0, order_type=None,
                            pair_symbol=None, new_order_client_id=None):
         if not new_order_client_id:
@@ -221,6 +229,7 @@ class Client:
                   'orderType': order_type, 'pairSymbol': pair_symbol}
         return self.submit_order(params)
 
+    @authentication_required
     def submit_stop_order(self, stop_price=0.0, quantity=0.0, price=0.0, order_type=None,
                           pair_symbol=None, new_order_client_id=None):
         if not new_order_client_id:
@@ -230,6 +239,7 @@ class Client:
                   'pairSymbol': pair_symbol}
         return self.submit_order(params)
 
+    @authentication_required
     def submit_order(self, params=None, **kwargs):
         request_url = self._create_auth_endpoint_url('order')
         self._update_session_headers()
