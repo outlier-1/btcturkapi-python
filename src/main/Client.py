@@ -1,3 +1,5 @@
+from .exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError
+
 import base64
 import hashlib
 import hmac
@@ -82,11 +84,10 @@ class Client:
     def _handle_response(response):
         status = response.status_code
         if status / 100 == 4:
-            # Raise bad request error
-            pass
+            raise BadRequestError(response)
+
         if status / 100 == 5:
-            # Raise internal server error
-            pass
+            raise InternalServerError(response)
 
     def _get(self, url, params=None):
         response = self.session.get(url=url, params=params)
@@ -98,8 +99,7 @@ class Client:
         self._handle_response(response)
 
         if response.json()['success'] == 'false':
-            # Raise invalid request parameter exception
-            pass
+            raise InvalidRequestParameterError(response)
 
         return response.json()['data']
 
