@@ -4,9 +4,10 @@ import hmac
 
 import requests
 import time
+import datetime as dt
+
 
 class Client:
-
     API_BASE = "https://api.btcturk.com"
     API_ENDPOINT_AUTH = "/api/v1/"
     API_ENDPOINT_NON_AUTH = "/api/v2/"
@@ -116,12 +117,76 @@ class Client:
 
     def get_order_book(self, pair=None, limit=100, **kwargs):
         request_url = self._create_public_endpoint_url('orderbook')
-        params = kwargs if kwargs else {'pairSymbol': pair, 'limit': limit}
+        params = kwargs if kwargs else dict(pairSymbol=pair, limit=limit)
 
         return self._get(request_url, params)
 
     def get_trades(self, pair=None, last=50, **kwargs):
         request_url = self._create_public_endpoint_url('trades')
-        params = kwargs if kwargs else {'pairSymbol': pair, 'last': last}
+        params = kwargs if kwargs else dict(pairSymbol=pair, last=last)
 
         return self._get(request_url, params=params)
+
+    # AUTHENTICATION REQUIRED ENDPOINT IMPLEMENTATIONS
+
+    def get_account_balance(self):
+        url = self._create_auth_endpoint_url('users/balances')
+        self._update_session_headers()
+        balance_list = self._get(url)
+        return balance_list
+
+    def get_trade_history(self, trade_type=None, symbol='BTC',
+                          start_date=None, end_date=int(time.time() * 1000), **kwargs):
+        if not start_date:
+            last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
+            start_date = int(last_30_days_timestamp * 1000)
+
+        if not trade_type:
+            trade_type = ['buy', 'sell']
+
+        request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'trade'
+        params = kwargs if kwargs else dict(type=trade_type, symbol=symbol, startDate=start_date, endDate=end_date)
+
+        self._update_session_headers()
+        history = self._get(request_url, params)
+        return history
+
+    def get_crypto_history(self, _type=None, symbol='BTC', start_date=None, end_date=int(time.time() * 1000), **kwargs):
+        if not start_date:
+            last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
+            start_date = int(last_30_days_timestamp * 1000)
+
+        if not _type:
+            _type = ['withdrawal', 'deposit']
+
+        request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'crypto'
+        params = kwargs if kwargs else dict(type=_type, symbol=symbol, startDate=start_date, endDate=end_date)
+
+        self._update_session_headers()
+        history = self._get(request_url, params)
+        return history
+
+    def get_fiat_history(self, balance_types=None, currency_symbols='try',
+                         start_date=None, end_date=int(time.time() * 1000), **kwargs):
+        if not start_date:
+            last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=3600))
+            start_date = int(last_30_days_timestamp * 1000)
+
+        if not balance_types:
+            balance_types = ['withdrawal', 'deposit']
+
+        request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'fiat'
+        params = kwargs if kwargs else dict(balanceTypes=balance_types, currencySymbols=currency_symbols,
+                                            startDate=start_date, endDate=end_date)
+
+        self._update_session_headers()
+        history = self._get(request_url, params)
+        return history
+
+    def get_open_orders(self, pair=None, **kwargs):
+        request_url = self._create_auth_endpoint_url('openOrders')
+        params = kwargs if kwargs else dict(pairSymbol=pair)
+
+        self._update_session_headers()
+        orders = self._get(request_url, params)
+        return orders
