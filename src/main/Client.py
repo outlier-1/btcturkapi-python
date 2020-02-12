@@ -1,10 +1,14 @@
 import base64
 import hashlib
 import hmac
+import json
 
 import requests
+
 import time
 import datetime as dt
+
+import uuid
 
 
 class Client:
@@ -117,17 +121,17 @@ class Client:
 
     def get_order_book(self, pair=None, limit=100, **kwargs):
         request_url = self._create_public_endpoint_url('orderbook')
-        params = kwargs if kwargs else dict(pairSymbol=pair, limit=limit)
+        params = kwargs if kwargs else {'pairSymbol': pair, 'limit': limit}
 
         return self._get(request_url, params)
 
     def get_trades(self, pair=None, last=50, **kwargs):
         request_url = self._create_public_endpoint_url('trades')
-        params = kwargs if kwargs else dict(pairSymbol=pair, last=last)
+        params = kwargs if kwargs else {'pairSymbol': pair, 'last': last}
 
         return self._get(request_url, params=params)
 
-    # AUTHENTICATION REQUIRED ENDPOINT IMPLEMENTATIONS
+    # AUTHENTICATION REQUIRED GET ENDPOINT IMPLEMENTATIONS
 
     def get_account_balance(self):
         url = self._create_auth_endpoint_url('users/balances')
@@ -145,7 +149,8 @@ class Client:
             trade_type = ['buy', 'sell']
 
         request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'trade'
-        params = kwargs if kwargs else dict(type=trade_type, symbol=symbol, startDate=start_date, endDate=end_date)
+        params = kwargs if kwargs else {'type': trade_type, 'symbol': symbol, 'startDate': start_date,
+                                        'endDate': end_date}
 
         self._update_session_headers()
         history = self._get(request_url, params)
@@ -160,7 +165,7 @@ class Client:
             _type = ['withdrawal', 'deposit']
 
         request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'crypto'
-        params = kwargs if kwargs else dict(type=_type, symbol=symbol, startDate=start_date, endDate=end_date)
+        params = kwargs if kwargs else {'type': _type, 'symbol': symbol, 'startDate': start_date, 'endDate': end_date}
 
         self._update_session_headers()
         history = self._get(request_url, params)
@@ -176,8 +181,8 @@ class Client:
             balance_types = ['withdrawal', 'deposit']
 
         request_url = self.API_BASE + self.API_ENDPOINT_TRANSACTIONS + 'fiat'
-        params = kwargs if kwargs else dict(balanceTypes=balance_types, currencySymbols=currency_symbols,
-                                            startDate=start_date, endDate=end_date)
+        params = kwargs if kwargs else {'balanceTypes': balance_types, 'currencySymbols': currency_symbols,
+                                        'startDate': start_date, 'endDate': end_date}
 
         self._update_session_headers()
         history = self._get(request_url, params)
@@ -185,8 +190,51 @@ class Client:
 
     def get_open_orders(self, pair=None, **kwargs):
         request_url = self._create_auth_endpoint_url('openOrders')
-        params = kwargs if kwargs else dict(pairSymbol=pair)
+        params = kwargs if kwargs else {'pairSymbol': pair}
 
         self._update_session_headers()
         orders = self._get(request_url, params)
         return orders
+
+    # AUTHENTICATION REQUIRED ORDER IMPLEMENTATIONS
+
+    def cancel_order(self, order_id=None):
+        request_url = self._create_auth_endpoint_url('order')
+        params = {'id': order_id}
+
+        self._update_session_headers()
+        self._delete(request_url, params)
+
+    def submit_market_order(self, quantity=0.0, order_type=None,
+                            pair_symbol=None, new_order_client_id=None):
+        if not new_order_client_id:
+            new_order_client_id = str(uuid.uuid1())
+        params = {'quantity': quantity, 'newOrderClientId': new_order_client_id, 'orderMethod': 'market',
+                  'orderType': order_type, 'pairSymbol': pair_symbol}
+        return self.submit_order(params)
+
+    def submit_limit_order(self, quantity=0.0, price=0.0, order_type=None,
+                           pair_symbol=None, new_order_client_id=None):
+        if not new_order_client_id:
+            new_order_client_id = str(uuid.uuid1())
+        params = {'quantity': quantity, 'price': price, 'newOrderClientId': new_order_client_id, 'orderMethod': 'limit',
+                  'orderType': order_type, 'pairSymbol': pair_symbol}
+        return self.submit_order(params)
+
+    def submit_stop_order(self, stop_price=0.0, quantity=0.0, price=0.0, order_type=None,
+                          pair_symbol=None, new_order_client_id=None):
+        if not new_order_client_id:
+            new_order_client_id = str(uuid.uuid1())
+        params = {'quantity': quantity, 'price': price, 'stopPrice': stop_price,
+                  'newOrderClientId': new_order_client_id, 'orderMethod': 'market', 'orderType': order_type,
+                  'pairSymbol': pair_symbol}
+        return self.submit_order(params)
+
+    def submit_order(self, params=None, **kwargs):
+        request_url = self._create_auth_endpoint_url('order')
+        self._update_session_headers()
+
+        if kwargs:
+            return self._post(request_url, kwargs)
+        return self._post(request_url, params)
+
