@@ -45,7 +45,7 @@ Daha sonra API_KEY ve API_SECRET isimleri anahtarlarınızı bir yere kaydedin.
 
 BTCTurkApiWrapper'ı pip aracılığıyla kurabilirsiniz. 
 ```sh
-sudo pip install btcturkapiwrapper 
+sudo pip install btcturk-api 
 ```
 Komutunu kullanarak paketi kurun.
 
@@ -55,7 +55,7 @@ Komutunu kullanarak paketi kurun.
 
 BTCTurkApiWrapper Client'ini projenize import edin
 ```py
-from BTCTurkApiWrapper.client import Client
+from btcturk_api.client import Client
 ```
 Bundan sonra Client'den bir nesne oluşturmanız yeterli olacaktır.
 Fiyat takibi gibi hesap izni gerektirmeyen işlemler için;
