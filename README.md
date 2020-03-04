@@ -45,7 +45,7 @@ Daha sonra API_KEY ve API_SECRET isimleri anahtarlarınızı bir yere kaydedin.
 
 BTCTurkApiWrapper'ı pip aracılığıyla kurabilirsiniz. 
 ```sh
-sudo pip install btcturk-api 
+sudo pip install btcturk_api 
 ```
 Komutunu kullanarak paketi kurun.
 
