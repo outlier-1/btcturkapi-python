@@ -40,8 +40,6 @@ class Client:
         self.authenticated = False
         self.session = self._init_session()
 
-        self._init_session()
-
         if api_key and api_secret:
             self.authenticate()
 
