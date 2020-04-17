@@ -231,7 +231,7 @@ class Client:
         response = self.session.post(url=url, data=json.dumps(params))
         self._handle_response(response)
 
-        if response.json()['success']:
+        if not response.json()['success']:
             raise InvalidRequestParameterError(response)
 
         return response.json()['data']
