@@ -207,7 +207,7 @@ class Client:
             Response's data section
         """
         response = self.session.get(url=url, params=params)
-        self._handle_response(response)
+        self._handle_response(response) # TODO: Need to raise exception (like _post), if error occurs
         return response.json()['data']
 
     def _post(self, url, params=None):
@@ -231,7 +231,7 @@ class Client:
         response = self.session.post(url=url, data=json.dumps(params))
         self._handle_response(response)
 
-        if response.json()['success'] == 'false':
+        if response.json()['success']:
             raise InvalidRequestParameterError(response)
 
         return response.json()['data']
