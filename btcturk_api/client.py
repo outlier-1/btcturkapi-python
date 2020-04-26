@@ -247,13 +247,13 @@ class Client:
 
         Returns
         -------
-        str
-            Success message if there is no exception raised by handler
+        bool
+            Success value if there is no exception raised by handler
         """
         response = self.session.delete(url=url, params=params, data=json.dumps(params))
         self._handle_response(response)
 
-        return "SUCCEEDED"
+        return response.json()['success']
 
     # PUBLIC ENDPOINT IMPLEMENTATIONS
 
@@ -649,13 +649,17 @@ class Client:
         Parameters
         ----------
         order_id : int, mandatory
-
+        
+        Returns
+        -------
+        bool
+            Success value if there is no exception raised by handler
         """
         request_url = self._create_auth_endpoint_url('order')
         params = {'id': order_id}
 
         self._update_session_headers()
-        self._delete(request_url, params)
+        return self._delete(request_url, params)
 
     @authentication_required
     def submit_market_order(self, quantity=0.0, order_type=None,
