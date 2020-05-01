@@ -12,6 +12,7 @@ BTCTurk API'nı efektif bir şekilde projelerinizde kullanabilmeniz için tasarl
 * [Kullanım](#kullanım)
 * [Lisans](#lisans)
 * [İletisim](#iletisim)
+* [Bağış](#bagis)
 
 
 
@@ -90,5 +91,13 @@ Miraç Baydemir -  omermirac59@gmail.com
 
 Project Link: [https://github.com/outlier-1/btcturkapi-python/](https://github.com/outlier-1/btcturkapi-python/)
 
+<!-- CONTACT -->
+## Bağış
+Kütüphaneyi projelerinizde kullanıp yararlı bulduysanız ve geliştiriciye katkıda bulunmak isterseniz bitcoin ile bağış yapabilirsiniz :)
 
+Bitcoin Address - '34FSjtdwTSB21uVDcptgJ8kPHHimMSCGxq'
+
+Miraç Baydemir -  omermirac59@gmail.com
+
+Project Link: [https://github.com/outlier-1/btcturkapi-python/](https://github.com/outlier-1/btcturkapi-python/
 
