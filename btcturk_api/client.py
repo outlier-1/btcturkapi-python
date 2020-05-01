@@ -180,10 +180,10 @@ class Client:
             If response code has 5xx format
         """
         status = response.status_code
-        if status / 100 == 4:
+        if status // 100 == 4:
             raise BadRequestError(response)
 
-        if status / 100 == 5:
+        if status // 100 == 5:
             raise InternalServerError(response)
 
     def _get(self, url, params=None):
