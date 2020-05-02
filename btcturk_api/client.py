@@ -205,6 +205,7 @@ class Client:
             Response's data section
         """
         response = self.session.get(url=url, params=params)
+        print(response.content)
         self._handle_response(response) # TODO: Need to raise exception (like _post), if error occurs
         return response.json()['data']
 
@@ -410,7 +411,7 @@ class Client:
 
     @authentication_required
     def get_trade_history(self, trade_type=None, symbol=None,
-                          start_date=None, end_date=int(time.time() * 1000), **kwargs):
+                          start_date=None, end_date=None, **kwargs):
         """ Gets the history of user's trades.
 
         If start_date not specified, it will get trades for last 30 days.
@@ -458,6 +459,9 @@ class Client:
             last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
             start_date = int(last_30_days_timestamp * 1000)
 
+        if not end_date:
+            end_date = int(time.time() * 1000)
+
         if not symbol:
             symbol = CRYPTO_SYMBOLS
 
@@ -473,7 +477,7 @@ class Client:
         return history
 
     @authentication_required
-    def get_crypto_history(self, symbol=None, _type=None, start_date=None, end_date=int(time.time() * 1000), **kwargs):
+    def get_crypto_history(self, symbol=None, _type=None, start_date=None, end_date=None, **kwargs):
         """ Gets the history of user's crypto transactions.
 
         If start_date not specified, it will get trades for last 30 days.
@@ -519,6 +523,9 @@ class Client:
             last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
             start_date = int(last_30_days_timestamp * 1000)
 
+        if not end_date:
+            end_date = int(time.time() * 1000)
+
         if not symbol:
             symbol = CRYPTO_SYMBOLS
 
@@ -534,7 +541,7 @@ class Client:
 
     @authentication_required
     def get_fiat_history(self, balance_types=None, currency_symbols=None,
-                         start_date=None, end_date=int(time.time() * 1000), **kwargs):
+                         start_date=None, end_date=None, **kwargs):
         """ Gets the history of user's fiat transactions.
 
         If start_date not specified, it will get trades for last 30 days.
@@ -578,8 +585,11 @@ class Client:
 
         """
         if not start_date:
-            last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=3600))
+            last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
             start_date = int(last_30_days_timestamp * 1000)
+
+        if not end_date:
+            end_date = int(time.time() * 1000)
 
         if not balance_types:
             balance_types = DEPOSIT_OR_WITHDRAWAL
@@ -831,3 +841,9 @@ class Client:
         if kwargs:
             return self._post(request_url, kwargs)
         return self._post(request_url, params)
+
+
+api_key = "87ab4ad7-b908-420f-abf7-85f40360f5f6"
+api_sec = "L1USAK8ABVIko7hpF/OiDrF7/bScdJKS"
+a = Client(api_key, api_sec)
+a.get_all_orders()
