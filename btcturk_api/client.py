@@ -842,8 +842,3 @@ class Client:
             return self._post(request_url, kwargs)
         return self._post(request_url, params)
 
-
-api_key = "87ab4ad7-b908-420f-abf7-85f40360f5f6"
-api_sec = "L1USAK8ABVIko7hpF/OiDrF7/bScdJKS"
-a = Client(api_key, api_sec)
-a.get_all_orders()
