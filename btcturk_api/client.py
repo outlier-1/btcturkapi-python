@@ -205,7 +205,6 @@ class Client:
             Response's data section
         """
         response = self.session.get(url=url, params=params)
-        print(response.content)
         self._handle_response(response) # TODO: Need to raise exception (like _post), if error occurs
         return response.json()['data']
 
@@ -651,6 +650,86 @@ class Client:
         orders = self._get(request_url, params)
         return orders
 
+    @authentication_required
+    def get_all_orders(self, order_id=0, pair_symbol=None, start_date=None,
+                       end_date=None, page=None, limit=100, **kwargs):
+
+        """ Get's users all orders for given pair
+
+        !!! IMPORTANT !!!
+        If you specify kwargs, the other parameters will be overridden.
+        Only keyword arguments you specified will be used to construct a query.
+        Therefore, it is your choice to use kwargs.
+
+        But i strongly discourage you to use that for avoiding any invalid requests
+
+        If start_date not specified, it will get orders for last 30 days.
+
+        Parameters
+        ----------
+        order_id: int, optional
+            If orderId set, it will return all orders greater than or equals to this order id
+
+        pair_symbol: str, mandatory
+            pair symbol
+
+        start_date: int, optional
+            start date as timestamp
+
+        end_date: int, optional
+            end date as timestamp
+
+        page: int, optional
+            page number
+
+        limit: int, optional
+            limit number
+
+        kwargs
+
+        Returns
+        -------
+        list
+            List of data dictionaries
+
+                Each Data Dictionary Has These Keys:
+
+                id: Order id
+                price: Price of the order
+                amount: Amount of the order
+                quantity: quantity of the order
+                pairsymbol: Pair of the order
+                pairSymbolNormalized: Pair of the order with "_" in between.
+                type: Type of order. Buy or Sell
+                method: Method of order. Limit, Stop Limit
+                orderClientId: Order client id created with (GUID if not set by user)
+                time: Unix time the order was inserted at
+                updateTime: Unix time last updated
+                status: Status of the order. Untouched (not matched), Partial (matched partially)
+        """
+        request_url = self._create_auth_endpoint_url('allOrders')
+
+        if not start_date:
+            last_30_days_timestamp = dt.datetime.timestamp(dt.datetime.today() - dt.timedelta(days=30))
+            start_date = int(last_30_days_timestamp * 1000)
+
+        if not end_date:
+            end_date = int(time.time() * 1000)
+
+        payload = {
+            'orderId': order_id,
+            'pairSymbol': pair_symbol,
+            'startDate': start_date,
+            'endDate': end_date,
+            'page': page,
+            'limit': limit
+        }
+        params = kwargs if kwargs else payload
+
+        self._update_session_headers()
+        orders = self._get(request_url, params)
+        return orders
+
     # AUTHENTICATION REQUIRED ORDER IMPLEMENTATIONS
     @authentication_required
     def cancel_order(self, order_id=None):
@@ -841,4 +920,3 @@ class Client:
         if kwargs:
             return self._post(request_url, kwargs)
         return self._post(request_url, params)
-
