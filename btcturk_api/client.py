@@ -716,6 +716,8 @@ class Client:
         if not end_date:
             end_date = int(time.time() * 1000)
 
+        order_id = order_id - 1 if order_id > 0 else 0
+
         payload = {
             'orderId': order_id,
             'pairSymbol': pair_symbol,

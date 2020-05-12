@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="btcturk_api",
-    version="1.0.5",
+    version="1.0.6",
     author="Ömer Miraç Baydemir",
     author_email="omermirac59@gmail.com",
     description="BTCTurk Rest API Python Implementation",
