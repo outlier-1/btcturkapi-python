@@ -1,8 +1,7 @@
 from btcturk_api.properties import authentication_required
 from btcturk_api.exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError, \
     BTCTurkAuthenticationError
-from btcturk_api.constants import CRYPTO_SYMBOLS, CURRENCY_SYMBOLS, DEPOSIT_OR_WITHDRAWAL, TRADE_TYPES
-
+from btcturk_api.constants import CRYPTO_SYMBOLS, CURRENCY_SYMBOLS, DEPOSIT_OR_WITHDRAWAL, TRADE_TYPES, SCALE_LIMITS
 import base64
 import hashlib
 import hmac
@@ -17,7 +16,6 @@ import uuid
 
 
 class Client:
-
     API_BASE = "https://api.btcturk.com"
     API_ENDPOINT_AUTH = "/api/v1/"
     API_ENDPOINT_NON_AUTH = "/api/v2/"
@@ -43,7 +41,8 @@ class Client:
         if api_key and api_secret:
             self.authenticate()
 
-    def _init_session(self):
+    @staticmethod
+    def _init_session():
         """ Initializes a requests.Session object with headers
 
         Returns
@@ -160,7 +159,6 @@ class Client:
         else:
             raise BTCTurkAuthenticationError(response)
 
-
     @staticmethod
     def _handle_response(response):
         """ Handles Incoming Responses
@@ -205,7 +203,7 @@ class Client:
             Response's data section
         """
         response = self.session.get(url=url, params=params)
-        self._handle_response(response) # TODO: Need to raise exception (like _post), if error occurs
+        self._handle_response(response)  # TODO: Need to raise exception (like _post), if error occurs
         return response.json()['data']
 
     def _post(self, url, params=None):
@@ -280,7 +278,7 @@ class Client:
         if not symbol_list:
             return exchange_list
 
-        filtered_list = list(filter(lambda x: x['name'] in symbol_list, exchange_list))
+        filtered_list = list(filter(lambda u: u['name'] in symbol_list, exchange_list))
         return filtered_list
 
     def tick(self, pair=None, **kwargs):
@@ -814,8 +812,13 @@ class Client:
         """
         if not new_order_client_id:
             new_order_client_id = str(uuid.uuid1())
-        params = {'quantity': quantity, 'newOrderClientId': new_order_client_id, 'orderMethod': 'market',
+
+        amount_scale = SCALE_LIMITS[pair_symbol.upper()]['amount_scale']
+        formatted_qty = float("{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale))
+
+        params = {'quantity': formatted_qty, 'newOrderClientId': new_order_client_id, 'orderMethod': 'market',
                   'orderType': order_type, 'pairSymbol': pair_symbol}
+
         return self.submit_order(params)
 
     @authentication_required
@@ -861,8 +864,17 @@ class Client:
         """
         if not new_order_client_id:
             new_order_client_id = str(uuid.uuid1())
-        params = {'quantity': quantity, 'price': price, 'newOrderClientId': new_order_client_id, 'orderMethod': 'limit',
-                  'orderType': order_type, 'pairSymbol': pair_symbol}
+
+        scale = SCALE_LIMITS[pair_symbol.upper()]
+        amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
+
+        formatted_qty = float("{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale))
+        formatted_price = float("{price:.{price_scale}f}".format(price=price, price_scale=price_scale))
+
+        params = {
+            'quantity': formatted_qty, 'price': formatted_price, 'newOrderClientId': new_order_client_id,
+            'orderMethod': 'limit', 'orderType': order_type, 'pairSymbol': pair_symbol
+        }
         return self.submit_order(params)
 
     @authentication_required
@@ -909,9 +921,20 @@ class Client:
         """
         if not new_order_client_id:
             new_order_client_id = str(uuid.uuid1())
-        params = {'quantity': quantity, 'price': price, 'stopPrice': stop_price,
-                  'newOrderClientId': new_order_client_id, 'orderMethod': 'market', 'orderType': order_type,
-                  'pairSymbol': pair_symbol}
+
+        scale = SCALE_LIMITS[pair_symbol.upper()]
+        amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
+
+        formatted_qty = float("{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale))
+        formatted_price = float("{price:.{price_scale}f}".format(price=price, price_scale=price_scale))
+        formatted_stop_price = float("{price:.{price_scale}f}".format(price=stop_price, price_scale=price_scale))
+
+        params = {
+            'quantity': formatted_qty, 'price': formatted_price, 'stopPrice': formatted_stop_price,
+            'newOrderClientId': new_order_client_id, 'orderMethod': 'market', 'orderType': order_type,
+            'pairSymbol': pair_symbol
+        }
+
         return self.submit_order(params)
 
     @authentication_required
