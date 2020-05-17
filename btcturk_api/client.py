@@ -257,6 +257,32 @@ class Client:
 
     # PUBLIC ENDPOINT IMPLEMENTATIONS
 
+    def get_exchange_info(self, symbol_list=None):
+        """ Price Ticker
+
+        Method for getting exchange info of any given pair
+
+        Parameters
+        ----------
+        symbol_list : List of Symbols in format ['BTCUSDT', 'XRPUSDT', 'ETHTRY' ...], optional
+            pair symbols must be in format Pair1Pair2, not Pair1_Pair2
+
+        Returns
+        -------
+        list
+            a list of data dictionaries of all pairs if symbol_list is not set
+            or list of exchange information in symbol list
+        """
+
+        request_url = self._create_public_endpoint_url('server/exchangeinfo')
+        exchange_list = self._get(request_url)['symbols']
+
+        if not symbol_list:
+            return exchange_list
+
+        filtered_list = list(filter(lambda x: x['name'] in symbol_list, exchange_list))
+        return filtered_list
+
     def tick(self, pair=None, **kwargs):
         """ Price Ticker
 
