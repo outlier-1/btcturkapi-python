@@ -814,7 +814,7 @@ class Client:
             new_order_client_id = str(uuid.uuid1())
 
         amount_scale = SCALE_LIMITS[pair_symbol.upper()]['amount_scale']
-        formatted_qty = float("{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale))
+        formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
 
         params = {'quantity': formatted_qty, 'newOrderClientId': new_order_client_id, 'orderMethod': 'market',
                   'orderType': order_type, 'pairSymbol': pair_symbol}
@@ -868,13 +868,14 @@ class Client:
         scale = SCALE_LIMITS[pair_symbol.upper()]
         amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
 
-        formatted_qty = float("{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale))
-        formatted_price = float("{price:.{price_scale}f}".format(price=price, price_scale=price_scale))
+        formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
+        formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
 
         params = {
             'quantity': formatted_qty, 'price': formatted_price, 'newOrderClientId': new_order_client_id,
             'orderMethod': 'limit', 'orderType': order_type, 'pairSymbol': pair_symbol
         }
+
         return self.submit_order(params)
 
     @authentication_required
@@ -925,9 +926,9 @@ class Client:
         scale = SCALE_LIMITS[pair_symbol.upper()]
         amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
 
-        formatted_qty = float("{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale))
-        formatted_price = float("{price:.{price_scale}f}".format(price=price, price_scale=price_scale))
-        formatted_stop_price = float("{price:.{price_scale}f}".format(price=stop_price, price_scale=price_scale))
+        formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
+        formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
+        formatted_stop_price = "{price:.{price_scale}f}".format(price=stop_price, price_scale=price_scale)
 
         params = {
             'quantity': formatted_qty, 'price': formatted_price, 'stopPrice': formatted_stop_price,
