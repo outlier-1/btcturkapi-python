@@ -1,3 +1,6 @@
+from requests import Response
+
+
 class BadRequestError(Exception):
     def __init__(self, response):
         self.response = response
@@ -24,10 +27,13 @@ class InvalidRequestParameterError(Exception):
 
 
 class BTCTurkAuthenticationError(Exception):
-    def __init__(self, response=None):
+    def __init__(self, response: Response):
         error_msg = "Authentication Error.\n"
-        if response:
-            error_msg += f"{response.json()['message']}"
+
+        if response.content:
+            server_response_message = response.json()['message']
+            error_msg += f"Server Response: {server_response_message}"
+
         super().__init__(error_msg)
 
 
