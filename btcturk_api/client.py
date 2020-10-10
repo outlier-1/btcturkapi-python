@@ -281,6 +281,42 @@ class Client:
         filtered_list = list(filter(lambda u: u['name'] in symbol_list, exchange_list))
         return filtered_list
 
+    def get_server_time(self, as_timestamp=False):
+        """ Gets Current Server Time
+
+        Method for getting server time info, both unix timestamp and DATE:TIME format.
+
+        Parameters
+        ----------
+        as_timestamp : bool, optional
+            if true, directly returns the unix-timestamp integer instead of server response.
+
+        Returns
+        -------
+        if as_timestamp:
+            int
+                Unix-timestamp
+        else:
+            dictionary
+                if request is successful, returns a dictionary object with 2 keys
+                'serverTime': Unix Timestamp as 'int' object
+                'serverTime2': Datetime string
+
+                Result Dictionary Has These Keys:
+
+                pairSymbol: Requested pair symbol
+                pairSymbolNormalized: Requested pair symbol with "_" in between.
+        """
+        request_url = self._create_public_endpoint_url('server/time')
+        response = self.session.get(url=request_url)
+        self._handle_response(response)
+        response_as_json = response.json()
+
+        if as_timestamp:
+            return response_as_json['serverTime']
+
+        return response_as_json
+
     def tick(self, pair=None, **kwargs):
         """ Price Ticker
 
