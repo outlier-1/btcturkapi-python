@@ -1,4 +1,6 @@
-from requests import Response
+from requests import Response, get
+from datetime import datetime
+import time
 
 
 class BadRequestError(Exception):
@@ -28,13 +30,34 @@ class InvalidRequestParameterError(Exception):
 
 class BTCTurkAuthenticationError(Exception):
     def __init__(self, response: Response):
-        error_msg = "Authentication Error.\n"
+        self.error_msg = "Authentication Error.\n"
 
         if response.content:
             server_response_message = response.json()['message']
-            error_msg += f"Server Response: {server_response_message}"
+            self.error_msg += f"Server Response: {server_response_message}"
+            if server_response_message == "Unauthorized - Invalid Nonce":
+                self._add_helper_msg_for_invalid_nonce()
+        super().__init__(self.error_msg)
 
-        super().__init__(error_msg)
+    def _add_helper_msg_for_invalid_nonce(self):
+        self.error_msg += "You have encountered Invalid Nonce Error.\nThis usually happens when your client's time and " \
+                          "server's time are inconsistent.\n"
+        client_time = datetime.now()
+        server_time = None
+        try:
+            server_time_response = get(url="https://api.btcturk.com/api/v2/server/time")
+            server_time = datetime.fromtimestamp(server_time_response.json()['serverTime'] / 1000)
+        except Exception as e:
+            self.error_msg += "Couldn't get server's time."
+
+        if not server_time:
+            return self.error_msg
+
+        if client_time < server_time:
+            self.error_msg += f"Your computer's time is behind of servers time by {server_time - client_time}"
+        else:
+            self.error_msg += f"Your computer's time is ahead of servers time by {client_time - server_time}"
+        return self.error_msg
 
 
 class UrlNotFoundError(Exception):
