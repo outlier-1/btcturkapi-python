@@ -34,7 +34,7 @@ class BTCTurkAuthenticationError(Exception):
 
         if response.content:
             server_response_message = response.json()['message']
-            self.error_msg += f"Server Response: {server_response_message}"
+            self.error_msg += f"Server Response: {server_response_message}\n"
             if server_response_message == "Unauthorized - Invalid Nonce":
                 self._add_helper_msg_for_invalid_nonce()
         super().__init__(self.error_msg)
