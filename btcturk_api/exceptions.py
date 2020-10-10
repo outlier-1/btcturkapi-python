@@ -1,6 +1,5 @@
 from requests import Response, get
 from datetime import datetime
-import time
 
 
 class BadRequestError(Exception):
