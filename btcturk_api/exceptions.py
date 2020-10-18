@@ -87,3 +87,8 @@ class InternalServerError(Exception):
 class UnknownError(Exception):
     def __init__(self, response):
         super().__init__(f"Unknown Response Code: {response.status_code}")
+
+
+class BadRespondError(Exception):
+    def __init__(self, message):
+        super().__init__(message)

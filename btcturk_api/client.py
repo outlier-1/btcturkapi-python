@@ -1,7 +1,7 @@
 from btcturk_api.properties import authentication_required
 from btcturk_api.exceptions import BadRequestError, InternalServerError, InvalidRequestParameterError, \
-    BTCTurkAuthenticationError
-from btcturk_api.constants import CRYPTO_SYMBOLS, CURRENCY_SYMBOLS, DEPOSIT_OR_WITHDRAWAL, TRADE_TYPES, SCALE_LIMITS
+    BTCTurkAuthenticationError, BadRespondError
+from btcturk_api.constants import CRYPTO_SYMBOLS, CURRENCY_SYMBOLS, DEPOSIT_OR_WITHDRAWAL, TRADE_TYPES
 import base64
 import hashlib
 import hmac
@@ -13,6 +13,7 @@ import time
 import datetime as dt
 
 import uuid
+import os
 
 
 class Client:
@@ -40,6 +41,56 @@ class Client:
 
         if api_key and api_secret:
             self.authenticate()
+
+        try:
+            self.SCALE_LIMITS = json.load(open(os.path.join(os.getcwd(), '.scale_limits.json')))
+        except FileNotFoundError:
+            self.SCALE_LIMITS = self._get_scale_limits()
+            json.dump(
+                self.SCALE_LIMITS,
+                open(os.path.join(os.getcwd(), '.scale_limits.json'), 'w')
+            )
+
+    def _get_scale_limits(self):
+        """ Gets Currency Scales For Price and Amount
+
+        This method should called whenever yo
+
+        Returns
+        -------
+        dict
+            Each object in this dictionary has this format:
+            scale_limits['exchangeName'] = { 'price_scale': x, 'amount_scale': y }
+
+
+        Raises
+        ----------
+        BadRespondError
+            If response doesn't have proper dictionary keys
+
+        """
+
+        request_url = self._create_public_endpoint_url('server/exchangeinfo')
+        response = self.session.get(url=request_url)
+        self._handle_response(response)
+
+        try:
+            scale_limits = {}
+            for scale_info in response.json()['data']['symbols']:
+                name = scale_info['name']
+                name_normalized = scale_info['nameNormalized']
+                price_scale = scale_info['denominatorScale']
+                amount_scale = scale_info['numeratorScale']
+
+                scale_limits[name] = {
+                    'price_scale': price_scale,
+                    'amount_scale': amount_scale
+                }
+                scale_limits[name_normalized] = scale_limits[name]
+
+            return scale_limits
+        except KeyError:
+            raise BadRespondError("Server didn't respond properly when requesting scale limits.")
 
     @staticmethod
     def _init_session():
@@ -845,17 +896,30 @@ class Client:
             pairSymbol": pair symbol,
             pairSymbolNormalized: "normalized pair symbol",
             newOrderClientId: guid
+
+        Raises
+        -------
+        ValueError
+            If wrong pair_symbol entered or file cache for scales hasn't been updated
         """
         if not new_order_client_id:
             new_order_client_id = str(uuid.uuid1())
 
-        amount_scale = SCALE_LIMITS[pair_symbol.upper()]['amount_scale']
-        formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
+        try:
+            amount_scale = self.SCALE_LIMITS[pair_symbol.upper()]['amount_scale']
+            formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
 
-        params = {'quantity': formatted_qty, 'newOrderClientId': new_order_client_id, 'orderMethod': 'market',
-                  'orderType': order_type, 'pairSymbol': pair_symbol}
-
-        return self.submit_order(params)
+            params = {'quantity': formatted_qty, 'newOrderClientId': new_order_client_id, 'orderMethod': 'market',
+                      'orderType': order_type, 'pairSymbol': pair_symbol}
+            return self.submit_order(params)
+        except KeyError:
+            scale_file_path = os.path.join(os.getcwd(), '.scale_limits.json')
+            if os.path.exists(scale_file_path):
+                os.remove(scale_file_path)
+                raise ValueError('Either you entered a wrong \'pair_symbol\' or a new pair symbol added to btcturk '
+                                 'exchange which it\'s limit information are not in file cache\n. '
+                                 'If this situation is latter just restart the client, everything should work fine.\n'
+                                 'Otherwise, check the \'pair_symbol\' you entered is correct.')
 
     @authentication_required
     def submit_limit_order(self, quantity=0.0, price=0.0, order_type=None,
@@ -897,22 +961,36 @@ class Client:
             pairSymbol": pair symbol,
             pairSymbolNormalized: "normalized pair symbol",
             newOrderClientId: guid
+
+        Raises
+        -------
+        ValueError
+            If wrong pair_symbol entered or file cache for scales hasn't been updated
         """
         if not new_order_client_id:
             new_order_client_id = str(uuid.uuid1())
 
-        scale = SCALE_LIMITS[pair_symbol.upper()]
-        amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
+        try:
+            scale = self.SCALE_LIMITS[pair_symbol.upper()]
+            amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
 
-        formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
-        formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
+            formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
+            formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
 
-        params = {
-            'quantity': formatted_qty, 'price': formatted_price, 'newOrderClientId': new_order_client_id,
-            'orderMethod': 'limit', 'orderType': order_type, 'pairSymbol': pair_symbol
-        }
+            params = {
+                'quantity': formatted_qty, 'price': formatted_price, 'newOrderClientId': new_order_client_id,
+                'orderMethod': 'limit', 'orderType': order_type, 'pairSymbol': pair_symbol
+            }
 
-        return self.submit_order(params)
+            return self.submit_order(params)
+        except KeyError:
+            scale_file_path = os.path.join(os.getcwd(), '.scale_limits.json')
+            if os.path.exists(scale_file_path):
+                os.remove(scale_file_path)
+                raise ValueError('Either you entered a wrong \'pair_symbol\' or a new pair symbol added to btcturk '
+                                 'exchange which it\'s limit information are not in file cache\n. '
+                                 'If this situation is latter just restart the client, everything should work fine.\n'
+                                 'Otherwise, check the \'pair_symbol\' you entered is correct.')
 
     @authentication_required
     def submit_stop_order(self, stop_price=0.0, quantity=0.0, price=0.0, order_type=None,
@@ -955,24 +1033,40 @@ class Client:
             pairSymbol": pair symbol,
             pairSymbolNormalized: "normalized pair symbol",
             newOrderClientId: guid
+
+        Raises
+        -------
+        ValueError
+            If wrong pair_symbol entered or file cache for scales hasn't been updated
         """
+
         if not new_order_client_id:
             new_order_client_id = str(uuid.uuid1())
 
-        scale = SCALE_LIMITS[pair_symbol.upper()]
-        amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
+        try:
+            scale = self.SCALE_LIMITS[pair_symbol.upper()]
+            amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
 
-        formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
-        formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
-        formatted_stop_price = "{price:.{price_scale}f}".format(price=stop_price, price_scale=price_scale)
+            formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
+            formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
+            formatted_stop_price = "{price:.{price_scale}f}".format(price=stop_price, price_scale=price_scale)
 
-        params = {
-            'quantity': formatted_qty, 'price': formatted_price, 'stopPrice': formatted_stop_price,
-            'newOrderClientId': new_order_client_id, 'orderMethod': 'market', 'orderType': order_type,
-            'pairSymbol': pair_symbol
-        }
+            params = {
+                'quantity': formatted_qty, 'price': formatted_price, 'stopPrice': formatted_stop_price,
+                'newOrderClientId': new_order_client_id, 'orderMethod': 'market', 'orderType': order_type,
+                'pairSymbol': pair_symbol
+            }
 
-        return self.submit_order(params)
+            return self.submit_order(params)
+
+        except KeyError:
+            scale_file_path = os.path.join(os.getcwd(), '.scale_limits.json')
+            if os.path.exists(scale_file_path):
+                os.remove(scale_file_path)
+                raise ValueError('Either you entered a wrong \'pair_symbol\' or a new pair symbol added to btcturk '
+                                 'exchange which it\'s limit information are not in file cache\n. '
+                                 'If this situation is latter just restart the client, everything should work fine.\n'
+                                 'Otherwise, check the \'pair_symbol\' you entered is correct.')
 
     @authentication_required
     def submit_order(self, params=None, **kwargs):
