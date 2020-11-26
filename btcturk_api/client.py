@@ -43,12 +43,12 @@ class Client:
             self.authenticate()
 
         try:
-            self.SCALE_LIMITS = json.load(open(os.path.join(os.getcwd(), '.scale_limits.json')))
+            self.SCALE_LIMITS = json.load(open(os.path.join(os.getcwd(), '.scale_limits_v1.json')))
         except FileNotFoundError:
             self.SCALE_LIMITS = self._get_scale_limits()
             json.dump(
                 self.SCALE_LIMITS,
-                open(os.path.join(os.getcwd(), '.scale_limits.json'), 'w')
+                open(os.path.join(os.getcwd(), '.scale_limits_v1.json'), 'w')
             )
 
     def _get_scale_limits(self):
@@ -81,10 +81,12 @@ class Client:
                 name_normalized = scale_info['nameNormalized']
                 price_scale = scale_info['denominatorScale']
                 amount_scale = scale_info['numeratorScale']
+                has_fraction = scale_info['hasFraction']
 
                 scale_limits[name] = {
                     'price_scale': price_scale,
-                    'amount_scale': amount_scale
+                    'amount_scale': amount_scale,
+                    'has_fraction': has_fraction
                 }
                 scale_limits[name_normalized] = scale_limits[name]
 
@@ -907,13 +909,19 @@ class Client:
 
         try:
             amount_scale = self.SCALE_LIMITS[pair_symbol.upper()]['amount_scale']
-            formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
+            has_fraction = self.SCALE_LIMITS[pair_symbol.upper()]['has_fraction']
+            price_scale = self.SCALE_LIMITS[pair_symbol.upper()]['price_scale'] if has_fraction else 0
+
+            scale = amount_scale if order_type.lower() == "sell" else price_scale
+
+            formatted_qty = "{quantity:.{scale}f}".format(quantity=quantity, scale=scale)
 
             params = {'quantity': formatted_qty, 'newOrderClientId': new_order_client_id, 'orderMethod': 'market',
                       'orderType': order_type, 'pairSymbol': pair_symbol}
+
             return self.submit_order(params)
         except KeyError:
-            scale_file_path = os.path.join(os.getcwd(), '.scale_limits.json')
+            scale_file_path = os.path.join(os.getcwd(), '.scale_limits_v1.json')
             if os.path.exists(scale_file_path):
                 os.remove(scale_file_path)
                 raise ValueError('Either you entered a wrong \'pair_symbol\' or a new pair symbol added to btcturk '
@@ -973,6 +981,9 @@ class Client:
         try:
             scale = self.SCALE_LIMITS[pair_symbol.upper()]
             amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
+            has_fraction = self.SCALE_LIMITS[pair_symbol.upper()]['has_fraction']
+
+            price_scale = price_scale if has_fraction else 0
 
             formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
             formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
@@ -984,7 +995,7 @@ class Client:
 
             return self.submit_order(params)
         except KeyError:
-            scale_file_path = os.path.join(os.getcwd(), '.scale_limits.json')
+            scale_file_path = os.path.join(os.getcwd(), '.scale_limits_v1.json')
             if os.path.exists(scale_file_path):
                 os.remove(scale_file_path)
                 raise ValueError('Either you entered a wrong \'pair_symbol\' or a new pair symbol added to btcturk '
@@ -1047,6 +1058,9 @@ class Client:
             scale = self.SCALE_LIMITS[pair_symbol.upper()]
             amount_scale, price_scale = scale['amount_scale'], scale['price_scale']
 
+            has_fraction = self.SCALE_LIMITS[pair_symbol.upper()]['has_fraction']
+            price_scale = price_scale if has_fraction else 0
+
             formatted_qty = "{quantity:.{amount_scale}f}".format(quantity=quantity, amount_scale=amount_scale)
             formatted_price = "{price:.{price_scale}f}".format(price=price, price_scale=price_scale)
             formatted_stop_price = "{price:.{price_scale}f}".format(price=stop_price, price_scale=price_scale)
@@ -1060,7 +1074,7 @@ class Client:
             return self.submit_order(params)
 
         except KeyError:
-            scale_file_path = os.path.join(os.getcwd(), '.scale_limits.json')
+            scale_file_path = os.path.join(os.getcwd(), '.scale_limits_v1.json')
             if os.path.exists(scale_file_path):
                 os.remove(scale_file_path)
                 raise ValueError('Either you entered a wrong \'pair_symbol\' or a new pair symbol added to btcturk '
@@ -1102,3 +1116,4 @@ class Client:
         if kwargs:
             return self._post(request_url, kwargs)
         return self._post(request_url, params)
+
