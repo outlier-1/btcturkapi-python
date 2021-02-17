@@ -15,18 +15,7 @@ Welcome to BTCTURK API - PYTHON's documentation!
    trade_operations
    exceptions
    common_errors
-   btcturk-api
-
-
-Features
-========
-
-
-Donate
-======
-
-Contact
-=======
+   btcturk_api
 
 
 Indices and tables

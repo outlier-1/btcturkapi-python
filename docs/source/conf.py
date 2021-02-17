@@ -12,17 +12,17 @@
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('../'))
-sys.path.append('C:\\Users\\Miraç\\PycharmProjects\\btcturkapi-python')
+
+sys.path.insert(0, os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 
 project = 'BTCTURK API - PYTHON'
-copyright = '2021, Mirac Baydemir'
+copyright = '2020 - 2021, Mirac Baydemir'
 author = 'Mirac Baydemir'
 
 # The full version, including alpha/beta/rc tags
-release = '1.5.1'
+release = '1.6.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,7 +32,7 @@ release = '1.5.1'
 # ones.
 extensions = [
     'numpydoc',
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
