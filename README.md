@@ -1,99 +1,107 @@
 # BTCTurk API - Python Wrapper
 
-BTCTurk API'nı efektif bir şekilde projelerinizde kullanabilmeniz için tasarlanmış bir python paketidir.
+btcturkapi-python is a wrapper library built around Btcturk's REST api implementation.
+
+It provides more abstract version of REST Client for traders using Btcturk as a cryptocurrency platform.
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
-* [Proje Hakkında](#proje-hakkında)
-* [Başlarken](#başlarken)
-  * [Gereklilikler](#gereklilikler)
-  * [Kurulum](#kurulum)
-* [Kullanım](#kullanım)
-* [Lisans](#lisans)
-* [İletisim](#i̇letisim)
-* [Bağış](#bağış)
+* [Features](#features)
+* [Quickstart](#Quickstart)
+  * [Requirements](#Requirements)
+  * [Installation](#Installation)
+* [Usage](#Usage)
+* [License](#License)
+* [Contact](#contact)
+* [Donation](#Donation)
 
 
 
-<!-- Proje Hakkında -->
-## Proje Hakkında
+<!-- Features -->
+## Features
 
-BTCTurkApiWrapper
-
-Bu paketi kullanarak BTCTurk hesabınızda:
-* Kripto paraların güncel fiyatlarını anında öğrenebilir
-* İstediğiniz alım ya da satım emrini girebilir (Stop, limit, market) ve emirlerinizi iptal edebilir
-* Hesabınızdaki tüm açık emirleri görüntüleyip filtreleyebilir,
-* Hesabınızın Cripto ve fiat işlem geçmişine ulaşabilirsiniz.
+* Monitor cryptocurrency prices.
+* Place buy, sell orders with stop, limit, or market methods.
+* List and cancel open orders.
+* Get crypto/fiat transaction history.
 
 
 <!-- GETTING STARTED -->
-## Başlarken
+## Quickstart
 
-Paketi kullanabilmek için gereklilikler, kurulum ve kullanım kısmındaki açıklamalardan faydalanabilirsiniz.
+In order to use this library for your projects, you can checkout installation and usage sections
 
-### Gereklilikler
+### Requirements
  
-* BTCTurk API KEY (İzin isteyen işlemlerde)
+* BTCTurk API Credentials (For Authentication Necessary Operations)
 ```
 https://www.btcturk.com/ApiAccess
 ```
-Yukarıdaki linke giderek ilk önce giriş yapıp, sonra API KEY'inizi oluşturunuz.
-Daha sonra API_KEY ve API_SECRET isimleri anahtarlarınızı bir yere kaydedin.
+You can go to link above and create your api credentials.
 
-### Kurulum
 
-BTCTurkApiWrapper'ı pip aracılığıyla kurabilirsiniz. 
+### Installation
+
+You can install this library via pip.
+
+It is the best practice using a virtual environment for your project, keep that in mind.
+
+Run this command through terminal:
+
 ```sh
 pip install btcturk-api 
 ```
-Komutunu kullanarak paketi kurun.
-
+Since the project's current version doesn't have support for websockets and any advanced features, dependencies are simple and you should not encounter any installation error.
 
 <!-- USAGE EXAMPLES -->
-## Kullanım
+## Usage
 
-BTCTurkApiWrapper Client'ini projenize import edin
+After installing the library, just import the client and you are good to go. You can use any feature btcturk api provides without dealing with preparing requests, handling responses etc.
+
 ```py
 from btcturk_api.client import Client
 ```
-Bundan sonra Client'den bir nesne oluşturmanız yeterli olacaktır.
-Fiyat takibi gibi hesap izni gerektirmeyen işlemler için;
+You can use public endpoints without providing an api key/secret pair.
+
 ```py
-client = Client()
+>>> my_client = Client()
+    >>> my_client.get_server_time()
+    {'serverTime': 1613292018131, 'serverTime2': '2021-02-14T08:40:18.1308832+00:00'}
 ```
-yeterli olacaktır. Fakat alım satım gibi hesap izni gerektiren işlemler için;
+If you have an api key/secret pair, you can use account endpoints and trading operations
+
 ```py
-client = Client(api_key, api_secret)
+>>> my_client = Client(api_key='<Your Api Key>', api_secret='<Your Api Secret>')
+>>> my_client.get_account_balance()
+    [
+      {
+       'asset': 'TRY',
+       'assetname': 'Türk Lirası',
+       'balance': '100.00',
+       'locked': '0',
+       'free': '100.00',
+       'orderFund': '0',
+       'requestFund': '0',
+       'precision': 2
+       },
+       {...}
+    ]
 ```
-BTCTurk'ten aldığınız API KEY VE API SECRET'ı Client'e parametre olarak vermeniz gerekmektedir.
-
-Yapabileceğiniz birkaç işlem:
-Bitcoin ve diğer kriptoların fiyatları için tick fonksiyonunu kullanın
-```py
-btc_price = client.tick('BTC_TRY') # ETH_TRY, XRP_TRY vs...
-```
-
-
-
 <!-- LICENSE -->
-## Lisans
+## License
 
-Bu python paketini herkes kullanabilir, değiştirebilir ve çoğaltabilir. Detaylı bilgi için LICENSE.txt'ye bakın
-
-
+You can use this library in your personal projects free of charge. Detailed information is in LICENSE.txt file.
 
 <!-- CONTACT -->
-## İletisim
+## Contact
 
 Miraç Baydemir -  omermirac59@gmail.com
 
 Project Link: [https://github.com/outlier-1/btcturkapi-python/](https://github.com/outlier-1/btcturkapi-python/)
 
-<!-- CONTACT -->
-## Bağış
-Kütüphaneyi projelerinizde kullanıp yararlı bulduysanız ve geliştiriciye katkıda bulunmak isterseniz bitcoin ile bağış yapabilirsiniz :)
+<!-- DONATION -->
+## Donation
 
 Bitcoin Address - '34FSjtdwTSB21uVDcptgJ8kPHHimMSCGxq'
 
