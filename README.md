@@ -6,7 +6,7 @@ It provides more abstract version of REST Client for traders using Btcturk as a 
 
 ## Documentation
 
-Check out the [https://btcturkapi-python.readthedocs.io/en/latest/](documentation) for learning  how to use this library and further reference
+Check out the [documentation](https://btcturkapi-python.readthedocs.io/en/latest/) for learning  how to use this library and further reference
 
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
