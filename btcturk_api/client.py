@@ -39,6 +39,9 @@ class Client:
     tick:
         Gets price related information of any given pair
 
+    get_ohlc_data:
+        Gets daily OHLC data for given pair
+
     get_order_book:
         Gets the order book of given pair
 
@@ -500,6 +503,59 @@ class Client:
 
         if pair:
             return self._get(request_url, {"pairSymbol": pair})
+        return self._get(request_url, params)
+
+    def get_ohlc_data(self, pair=None, last=10, **kwargs):
+        """ Gets daily OHLC data for given pair
+
+        If you specify kwargs, the other parameters will be **overridden.**
+        Only keyword arguments you specified will be used to construct a query.
+        Therefore, it is your choice to use kwargs.
+
+        But i strongly discourage you to use that for avoiding any invalid requests
+
+        Parameters
+        ----------
+        pair : str, optional
+            pair symbol like 'BTC_TRY', 'ETH_BTC', ...
+
+        last : int, optional
+            number of days
+
+        kwargs
+
+        Returns
+        -------
+        list
+            a list of data dictionary for given pair
+
+            Example of Response Format
+
+            .. code-block:: python
+
+                [
+                  {
+                    'pairSymbol': '<Requested pair symbol>',
+                    'pairSymbolNormalized': '<Requested pair symbol with "_" in between.>',
+                    'time': '<Current Unix time in milliseconds>'
+                    'open': '<Price of the opening trade on the time>',
+                    'high': '<Highest trade price on the time>',
+                    'low': '<Lowest trade price on the time>',
+                    'close': '<Price of the closing trade on the time>',
+                    'volume': '<Total volume on the time>',
+                    'average': '<Average price on the time>',
+                    'dailyChangeAmount': '<Amount of difference between Close and Open on the Date>',
+                    'dailyChangePercentage': '<Percentage of difference between Close and Open on the Date>',
+                  },
+                  ...
+                ]
+        """
+
+        request_url = self._create_public_endpoint_url("ohlc")
+        params = kwargs if kwargs else {}
+
+        if pair:
+            return self._get(request_url, {"pairSymbol": pair, "last": last})
         return self._get(request_url, params)
 
     def get_order_book(self, pair=None, limit=100, **kwargs):

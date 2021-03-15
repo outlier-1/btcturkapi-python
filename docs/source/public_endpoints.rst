@@ -67,6 +67,29 @@ Get Ticker
       'order': 1000
       }
 
+Get OHLC Data
+*************
+
+.. code-block:: python
+
+    >>> my_client.get_ohlc_data(pair='BTC_USDT')
+
+    [
+      {
+        'pairSymbol': 'BTCUSDT',
+        'pairNormalized': 'BTC_USDT',
+        'time': 1615766400000,
+        'open': '59125',
+        'high': '60575',
+        'low': '58804',
+        'close': '60396',
+        'volume': '17.989352800214',
+        'average': '59608.66',
+        'dailyChangeAmount': '1271',
+        'dailyChangePercentage': '2.15',
+        },
+        ...
+      ]
 
 Get Order book
 **************
