@@ -4,6 +4,10 @@ btcturkapi-python is a wrapper library built around Btcturk's REST api implement
 
 It provides more abstract version of REST Client for traders using Btcturk as a cryptocurrency platform.
 
+## Documentation
+
+Check out the [documentation](https://btcturkapi-python.readthedocs.io/en/latest/) for learning  how to use this library and further reference
+
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
 
