@@ -1,5 +1,10 @@
 # BTCTurk-Python API Release Notes
 
+## v1.8.1
+
+### Bug Fixes
+* Changed the way about formatting price and quantity metrics. It doesn't rounds up while formatting anymore.
+
 ## v1.7.1
 
 ### New Features

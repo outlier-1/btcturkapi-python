@@ -12,6 +12,8 @@ from btcturk_api.constants import (
     TRADE_TYPES,
 )
 
+from decimal import Decimal, ROUND_DOWN, InvalidOperation
+
 import base64
 import hashlib
 import hmac
@@ -106,6 +108,36 @@ class Client:
 
         if api_key and api_secret:
             self._authenticate()
+
+    def _format_unit(self, unit, scale):
+        """ Rounds down the unit to given decimal points
+
+        Parameters
+        ----------
+        unit : float, mandatory
+            It might be a price or quantity
+
+        scale: int, mandatory
+            Specifies the precision of decimal points
+
+        Returns
+        -------
+            Decimal
+                Decimal object of formatted unit
+
+        Raises
+        ------
+        ValueError
+            If user doesn't provide a valid float input
+
+        """
+        try:
+            scale_in_decimal_form = Decimal(str(1 / (10 ** scale))) if scale != 0 else Decimal(str(0))
+            formatted_unit = Decimal(str(unit)).quantize(scale_in_decimal_form, rounding=ROUND_DOWN)
+            return formatted_unit
+        except InvalidOperation as e:
+            raise ValueError(f"Error occurred while trying to format your input '{unit}'. "
+                             f"Make sure you're entering a valid float number")
 
     def _get_scale_limits(self):
         """ Gets Currency Scales For Price and Amount
@@ -1138,7 +1170,7 @@ class Client:
 
         Parameters
         ----------
-        quantity : decimal, mandatory
+        quantity : float, mandatory
             Mandatory for market or limit orders.
 
         order_type : str, mandatory
@@ -1186,7 +1218,7 @@ class Client:
 
         scale = amount_scale if order_type.lower() == "sell" else price_scale
 
-        formatted_qty = "{quantity:.{scale}f}".format(quantity=quantity, scale=scale)
+        formatted_qty = str(self._format_unit(unit=quantity, scale=scale))
 
         params = {
             "quantity": formatted_qty,
@@ -1211,10 +1243,10 @@ class Client:
 
         Parameters
         ----------
-        quantity : decimal, mandatory
+        quantity : float, mandatory
             Mandatory for market or limit orders.
 
-        price : decimal, mandatory
+        price : float, mandatory
             Price field will be ignored for market orders.
 
         order_type : str, mandatory
@@ -1262,12 +1294,8 @@ class Client:
 
         price_scale = price_scale if has_fraction else 0
 
-        formatted_qty = "{quantity:.{amount_scale}f}".format(
-            quantity=quantity, amount_scale=amount_scale
-        )
-        formatted_price = "{price:.{price_scale}f}".format(
-            price=price, price_scale=price_scale
-        )
+        formatted_qty = str(self._format_unit(unit=quantity, scale=amount_scale))
+        formatted_price = str(self._format_unit(unit=price, scale=price_scale))
 
         params = {
             "quantity": formatted_qty,
@@ -1295,13 +1323,13 @@ class Client:
 
         Parameters
         ----------
-        stop_price: decimal, mandatory
+        stop_price: float, mandatory
             For stop orders
 
-        quantity : decimal, mandatory
+        quantity : float, mandatory
             Mandatory for market or limit orders.
 
-        price : decimal, mandatory
+        price : float, mandatory
             Price field will be ignored for market orders.
 
         order_type : str, mandatory
@@ -1351,15 +1379,9 @@ class Client:
         has_fraction = self.scale_limits[pair_symbol.upper()]["has_fraction"]
         price_scale = price_scale if has_fraction else 0
 
-        formatted_qty = "{quantity:.{amount_scale}f}".format(
-            quantity=quantity, amount_scale=amount_scale
-        )
-        formatted_price = "{price:.{price_scale}f}".format(
-            price=price, price_scale=price_scale
-        )
-        formatted_stop_price = "{price:.{price_scale}f}".format(
-            price=stop_price, price_scale=price_scale
-        )
+        formatted_qty = str(self._format_unit(unit=quantity, scale=amount_scale))
+        formatted_price = str(self._format_unit(unit=price, scale=price_scale))
+        formatted_stop_price = str(self._format_unit(unit=stop_price, scale=price_scale))
 
         params = {
             "quantity": formatted_qty,
