@@ -20,7 +20,7 @@ packaging==20.9
 pathspec==0.8.1
 pycparser==2.20
 Pygments==2.7.4
-PyJWT==2.0.1
+PyJWT==2.4.0
 pyparsing==2.4.7
 pytz==2021.1
 regex==2020.11.13
